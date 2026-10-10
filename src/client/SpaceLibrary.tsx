@@ -71,7 +71,7 @@ export function SpaceLibrary({
           <Search size={17} />
           <input
             aria-label="Search pages"
-            placeholder="Search pages"
+            placeholder="ページを検索"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
           />
@@ -83,7 +83,7 @@ export function SpaceLibrary({
             value={sort}
             onChange={(e) => setSort(e.target.value)}
           >
-            <option value="recent">Recently edited</option>
+            <option value="recent">最近編集した順</option>
             <option value="name">Name A–Z</option>
           </select>
         </label>

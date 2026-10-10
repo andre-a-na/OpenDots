@@ -11,9 +11,9 @@ export function themePreference(): ThemePreference {
     const value = localStorage.getItem(key);
     if (value === 'light' || value === 'dark') return value;
   } catch {
-    // Fall through to the system theme.
+    // Fall through to the default theme.
   }
-  return 'system';
+  return 'dark';
 }
 export function resolveTheme(preference: ThemePreference, systemDark: boolean) {
   return preference === 'system' ? (systemDark ? 'dark' : 'light') : preference;

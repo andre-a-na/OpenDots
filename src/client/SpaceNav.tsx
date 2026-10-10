@@ -90,7 +90,7 @@ export function SpaceNav({
             branches(null)
           )}
           {!error && !pages.length && (
-            <p className="sidebar-empty">No pages yet</p>
+            <p className="sidebar-empty">ページはまだありません</p>
           )}
         </div>
       )}

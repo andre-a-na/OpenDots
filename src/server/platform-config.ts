@@ -41,6 +41,10 @@ export interface PlatformConfig extends WebConfig {
   model?: string;
   apiKey?: string;
   baseUrl: string;
+  /** Extra HTTP headers for the model provider (e.g. anthropic-workspace-id). */
+  modelHeaders?: Record<string, string>;
+  /** fetch used for model calls (metered for usage tracking). */
+  modelFetch?: typeof fetch;
   computerSupervisorUrl?: string;
   computerSupervisorToken?: string;
   computerToken?: string;

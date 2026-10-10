@@ -5,6 +5,8 @@ export interface Config extends WebConfig {
   mode: 'sample' | 'live';
   apiKey?: string;
   baseUrl: string;
+  modelHeaders?: Record<string, string>;
+  modelFetch?: typeof fetch;
   model?: string;
   browserUrl?: string;
   browserSecret?: string;
@@ -146,13 +148,14 @@ export async function research(
   }
   progress('Sources captured. Writing a brief grounded in the evidence.');
   signal.throwIfAborted();
-  const completion = await fetch(
+  const completion = await (config.modelFetch ?? fetch)(
     `${config.baseUrl.replace(/\/$/, '')}/chat/completions`,
     {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${config.apiKey}`,
+        ...(config.modelHeaders ?? {}),
       },
       signal,
       body: JSON.stringify({

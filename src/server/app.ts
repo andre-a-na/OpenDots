@@ -10,11 +10,13 @@ import { configured, type Config } from './research.js';
 import type { Platform } from './platform.js';
 import { VoiceService } from './voice.js';
 import { workspaceRoutes } from './workspace-routes.js';
+import { usageSummary, type UsageBudget } from './usage.js';
 const interval = z.number().int().min(60).max(31_536_000).nullable();
 export interface AppOptions {
   store: Store;
   runner: Runner;
   config: Config;
+  usageBudget?: UsageBudget;
   ownerToken?: string;
   origin?: string | string[];
   platform?: Platform;
@@ -23,6 +25,7 @@ export function createApp({
   store,
   runner,
   config,
+  usageBudget,
   ownerToken,
   origin,
   platform,
@@ -98,6 +101,18 @@ export function createApp({
     );
   const voice = platform ? new VoiceService(platform) : undefined;
   if (platform && voice) app.route('/api', workspaceRoutes(platform, voice));
+  app.get('/api/usage', (c) =>
+    c.json(
+      usageSummary(
+        store,
+        usageBudget ?? {
+          budgetUsd: 0,
+          periodStart: '1970-01-01',
+          periodEnd: '2100-01-01',
+        },
+      ),
+    ),
+  );
   app.get('/api/state', (c) =>
     c.json({
       settings: store.settings(),

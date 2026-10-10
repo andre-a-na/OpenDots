@@ -320,7 +320,7 @@ export function Chat({
       </header>
       {pageContext && (
         <div className="page-chat-context">
-          Working on{' '}
+          作業中のページ{' '}
           <a href={`/#/spaces/${pageContext.spaceId}/pages/${pageContext.id}`}>
             {pageContext.title}
           </a>
@@ -330,10 +330,10 @@ export function Chat({
         {!visible.length && (
           <div className="chat-welcome">
             <span className="eyebrow">A LITTLE SPACE TO THINK</span>
-            <h1>What’s on your mind?</h1>
+            <h1>何から始めますか？</h1>
             <p>{dot.instructions}</p>
             <p className="muted">
-              Your conversation stays with this Dot, across text and calls.
+              この会話はこのドットに残り、テキストでも通話でも続けられます。
             </p>
           </div>
         )}
@@ -429,7 +429,7 @@ export function Chat({
           </button>
           <textarea
             aria-label="Message your Dot"
-            placeholder={`Message ${dot.name}…`}
+            placeholder={`${dot.name} に話しかける…`}
             rows={1}
             value={draft}
             maxLength={4000}
@@ -462,8 +462,8 @@ export function Chat({
         </div>
         <div className="chat-compose-note">
           {voiceReady
-            ? 'Text and voice, one conversation.'
-            : 'Text is ready. Voice needs separate server configuration.'}
+            ? 'テキストと音声、ひとつの会話。'
+            : 'テキストは利用可。音声は別途サーバー設定が必要です。'}
         </div>
       </form>
     </div>

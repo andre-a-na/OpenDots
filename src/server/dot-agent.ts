@@ -309,6 +309,8 @@ export class DotAgent extends AbstractAgent {
           baseURL: this.config.baseUrl ?? 'https://api.openai.com/v1',
           api: 'chat-completions',
           maxRetries: 1,
+          defaultHeaders: this.config.modelHeaders,
+          fetch: this.config.modelFetch,
         });
         const serverTools = [
           ...tools,

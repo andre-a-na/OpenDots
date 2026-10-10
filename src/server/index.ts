@@ -6,6 +6,7 @@ import { serveStatic } from '@hono/node-server/serve-static';
 import { Store } from './store.js';
 import { Runner } from './runner.js';
 import { createApp } from './app.js';
+import { meteredFetch, usageBudgetFromEnv } from './usage.js';
 import { resolveAppOrigins } from './app-origin.js';
 import { WorkspaceStore } from './workspace.js';
 import { Platform } from './platform.js';
@@ -30,6 +31,18 @@ const workspace = new WorkspaceStore(
   database,
   process.env.OWNER_ID ?? 'opendots-owner',
 );
+/** OPENAI_EXTRA_HEADERS: JSON object of extra headers sent to the model provider. */
+function modelHeadersFromEnv(env: NodeJS.ProcessEnv): Record<string, string> | undefined {
+  const raw = env.OPENAI_EXTRA_HEADERS?.trim();
+  if (!raw) return undefined;
+  const parsed: unknown = JSON.parse(raw);
+  if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
+    throw new Error('OPENAI_EXTRA_HEADERS must be a JSON object.');
+  }
+  return Object.fromEntries(
+    Object.entries(parsed as Record<string, unknown>).map(([k, v]) => [k, String(v)]),
+  );
+}
 const config: PlatformConfig = {
   intelligenceKey: intelligenceApiKeyFromEnv(process.env),
   intelligenceApiUrl: process.env.INTELLIGENCE_API_URL || undefined,
@@ -37,6 +50,8 @@ const config: PlatformConfig = {
   apiKey: process.env.OPENAI_API_KEY,
   model: process.env.OPENAI_MODEL,
   baseUrl: process.env.OPENAI_BASE_URL ?? 'https://api.openai.com/v1',
+  modelHeaders: modelHeadersFromEnv(process.env),
+  modelFetch: meteredFetch(store, 'chat'),
   webSearchProvider: webSearchProvider(process.env.WEB_SEARCH_PROVIDER),
   parallelApiKey: process.env.PARALLEL_API_KEY,
   browserUrl: process.env.BROWSER_URL,
@@ -64,6 +79,8 @@ const researchConfig = {
   apiKey: config.apiKey,
   model: config.model,
   baseUrl: config.baseUrl,
+  modelHeaders: config.modelHeaders,
+  modelFetch: meteredFetch(store, 'research'),
   webSearchProvider: config.webSearchProvider,
   parallelApiKey: config.parallelApiKey,
   browserUrl: config.browserUrl,
@@ -92,6 +109,7 @@ const app = createApp({
   store,
   runner,
   config: researchConfig,
+  usageBudget: usageBudgetFromEnv(process.env),
   ownerToken,
   origin: resolveAppOrigins(process.env.APP_ORIGIN, process.env.NODE_ENV),
   platform,

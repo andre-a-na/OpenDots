@@ -1,5 +1,6 @@
 import { openPageLink } from './page-navigation';
 import { SpaceNav } from './SpaceNav';
+import { UsageMeter } from './UsageMeter';
 import { SpaceWorkspace } from './SpaceWorkspace';
 import { useCallback, useEffect, useState, useRef } from 'react';
 import { CopilotKitProvider } from '@copilotkit/react-core/v2';
@@ -389,10 +390,10 @@ export function App() {
           onClick={() => void newConversation()}
         >
           <Plus size={17} />
-          <span>New chat</span>
+          <span>新しい会話</span>
         </button>
         <div className="spaces-heading nav-label">
-          DOTS
+          DOTS ・ ドット
           <button
             className="icon-button"
             aria-label="Create Dot"
@@ -429,7 +430,7 @@ export function App() {
           ))}
         </nav>
         <div className="spaces-heading nav-label">
-          SPACES
+          SPACES ・ スペース
           <button
             className="icon-button"
             aria-label="Create Space"
@@ -468,7 +469,7 @@ export function App() {
           />
         ) : (
           <div className="sidebar-empty">
-            Set up text chat to begin a persistent conversation.
+            設定でモデルと会話サービスを接続すると会話を始められます。
           </div>
         )}
         <div className="sidebar-bottom">
@@ -480,7 +481,7 @@ export function App() {
             }}
           >
             <Clock3 size={17} />
-            <span>Scheduled & activity</span>
+            <span>予定・活動</span>
             {state.tasks.length > 0 && <small>{state.tasks.length}</small>}
           </button>
           <button
@@ -491,7 +492,7 @@ export function App() {
             }}
           >
             <BookOpen size={17} />
-            <span>Memories</span>
+            <span>記憶</span>
             {state.memories.length > 0 && (
               <small>{state.memories.length}</small>
             )}
@@ -501,7 +502,7 @@ export function App() {
             onClick={() => setDialog({ type: 'settings' })}
           >
             <Settings2 size={17} />
-            <span>Settings & setup</span>
+            <span>設定</span>
           </button>
           <a
             className="nav-item"
@@ -510,9 +511,10 @@ export function App() {
             rel="noreferrer"
           >
             <Code2 size={17} />
-            <span>Make it your own</span>
+            <span>GitHub（OpenDots）</span>
             <ArrowUpRight size={13} />
           </a>
+          <UsageMeter refreshKey={state.tasks.length + workspace.conversations.length} />
           <div className="version">
             OPEN SOURCE TEMPLATE <span>v0.1</span>
           </div>
@@ -531,22 +533,22 @@ export function App() {
             <span>
               {view === 'space'
                 ? workspace.spaces.find((space) => space.id === spaceId)?.name
-                : 'Dots'}
+                : 'ドット'}
             </span>
             <span>/</span>
             <strong>
               {view === 'chat'
                 ? dot.name
                 : view === 'tasks'
-                  ? 'Activity'
+                  ? '予定・活動'
                   : view === 'space'
-                    ? 'Pages'
-                    : 'Memories'}
+                    ? 'ページ'
+                    : '記憶'}
             </strong>
           </div>
           <div className="top-actions">
             <span className="mode-badge">
-              {configured ? 'SELF-HOSTED' : 'SETUP REQUIRED'}
+              {configured ? 'SELF-HOSTED ・ 自前運用' : '要セットアップ'}
             </span>
             <button
               className="pause-button"
@@ -560,7 +562,7 @@ export function App() {
               }
             >
               {state.settings.paused ? <Play size={14} /> : <Pause size={14} />}
-              <span>{state.settings.paused ? 'Resume' : 'Pause'}</span>
+              <span>{state.settings.paused ? '再開' : '一時停止'}</span>
             </button>
             <button
               className="icon-button"
@@ -651,7 +653,7 @@ export function App() {
                         setDialog({ type: 'dot', dot, spaceId: dot.spaceId })
                       }
                     >
-                      Edit specialist <MoreHorizontal size={14} />
+                      設定を編集 <MoreHorizontal size={14} />
                     </button>
                   </div>
                   {!configured && (
@@ -697,8 +699,8 @@ export function App() {
                       aria-label="Start a conversation"
                       placeholder={
                         configured
-                          ? `Message ${dot.name}…`
-                          : 'Your first conversation starts after setup.'
+                          ? `${dot.name} に話しかける…`
+                          : 'セットアップ後に最初の会話を始められます。'
                       }
                       value={prompt}
                       maxLength={4000}
@@ -714,7 +716,7 @@ export function App() {
                     <div className="composer-bottom">
                       <span>
                         <MessageCircle size={14} />
-                        Text and calls, one continuing conversation
+                        テキストと通話、ひとつの続く会話
                       </span>
                       <button
                         className="send-button"
@@ -727,9 +729,9 @@ export function App() {
                   </form>
                   <div className="starter-suggestions">
                     {[
-                      'Help me think this through',
-                      'Research a public page',
-                      'Make a plan I can follow',
+                      '開業までの直近の未決事項を整理して',
+                      '届出期限カレンダーで今月の期限を教えて',
+                      '今日やることの計画を立てて',
                     ].map((text) => (
                       <button
                         key={text}
@@ -750,7 +752,7 @@ export function App() {
                       className="text-button"
                       onClick={() => setDialog({ type: 'settings' })}
                     >
-                      Setup details
+                      設定の詳細
                     </button>
                   </div>
                 </div>
@@ -956,7 +958,11 @@ export function App() {
     </div>
   );
   return configured ? (
-    <CopilotKitProvider runtimeUrl="/api/copilotkit" headers={authHeaders()}>
+    <CopilotKitProvider
+      runtimeUrl="/api/copilotkit"
+      headers={authHeaders()}
+      showDevConsole={false}
+    >
       {content}
     </CopilotKitProvider>
   ) : (

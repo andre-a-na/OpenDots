@@ -32,6 +32,8 @@ export class Store {
       CREATE TABLE IF NOT EXISTS runs (id TEXT PRIMARY KEY, taskId TEXT NOT NULL, status TEXT NOT NULL, startedAt INTEGER NOT NULL, finishedAt INTEGER, result TEXT, error TEXT);
       CREATE TABLE IF NOT EXISTS events (id INTEGER PRIMARY KEY AUTOINCREMENT, taskId TEXT NOT NULL, runId TEXT, text TEXT NOT NULL, createdAt INTEGER NOT NULL);
       CREATE TABLE IF NOT EXISTS memories (id TEXT PRIMARY KEY, text TEXT NOT NULL, createdAt INTEGER NOT NULL);
+      CREATE TABLE IF NOT EXISTS model_usage (id INTEGER PRIMARY KEY AUTOINCREMENT, createdAt INTEGER NOT NULL, model TEXT NOT NULL, source TEXT NOT NULL, promptTokens INTEGER NOT NULL, completionTokens INTEGER NOT NULL, costUsd REAL NOT NULL);
+      CREATE INDEX IF NOT EXISTS model_usage_time ON model_usage(createdAt);
       CREATE INDEX IF NOT EXISTS tasks_due ON tasks(status, nextRunAt);
       CREATE INDEX IF NOT EXISTS runs_task ON runs(taskId, startedAt);
       CREATE INDEX IF NOT EXISTS events_task ON events(taskId, id);`);
@@ -52,6 +54,40 @@ export class Store {
   }
   clearSetupTelemetry() {
     this.db.prepare('DELETE FROM setup_telemetry').run();
+  }
+  recordUsage(row: {
+    model: string;
+    source: string;
+    promptTokens: number;
+    completionTokens: number;
+    costUsd: number;
+  }) {
+    this.db
+      .prepare(
+        'INSERT INTO model_usage (createdAt, model, source, promptTokens, completionTokens, costUsd) VALUES (?, ?, ?, ?, ?, ?)',
+      )
+      .run(
+        Date.now(),
+        row.model,
+        row.source,
+        row.promptTokens,
+        row.completionTokens,
+        row.costUsd,
+      );
+  }
+  usageRows(from: number, to: number) {
+    return this.db
+      .prepare(
+        'SELECT createdAt, model, source, promptTokens, completionTokens, costUsd FROM model_usage WHERE createdAt >= ? AND createdAt < ? ORDER BY createdAt',
+      )
+      .all(from, to) as {
+      createdAt: number;
+      model: string;
+      source: string;
+      promptTokens: number;
+      completionTokens: number;
+      costUsd: number;
+    }[];
   }
   close() {
     this.db.close();

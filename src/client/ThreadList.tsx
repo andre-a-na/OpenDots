@@ -25,11 +25,11 @@ export function ThreadList({
   return (
     <section className="thread-list">
       <div className="nav-label">
-        RECENT CHATS
+        RECENT CHATS ・ 最近の会話
         <button
           className="icon-button"
           onClick={onNew}
-          aria-label="New conversation"
+          aria-label="新しい会話"
         >
           <Plus size={14} />
         </button>
@@ -56,7 +56,7 @@ export function ThreadList({
         );
       })}
       {!local.length && (
-        <p className="sidebar-empty">Your first conversation will live here.</p>
+        <p className="sidebar-empty">最初の会話がここに表示されます。</p>
       )}
       {threads.hasMoreThreads && (
         <button
